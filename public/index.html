@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Quotex OTC Chart Viewer</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@5.0.0/dist/lightweight-charts.standalone.production.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">LIVE OTC MARKET FEED</p>
+          <h1>Quotex Market Chart Viewer</h1>
+        </div>
+        <div class="market-select-wrap">
+          <label for="symbolSelect">Symbol</label>
+          <select id="symbolSelect"></select>
+        </div>
+      </header>
+
+      <section class="stats-grid" id="statsGrid"></section>
+
+      <main class="chart-card">
+        <div class="chart-header">
+          <div>
+            <p class="chart-label">Current market</p>
+            <h2 id="activeSymbol">EURUSD_otc</h2>
+          </div>
+          <div class="price-badge" id="priceBadge">--</div>
+        </div>
+        <div id="chart"></div>
+      </main>
+    </div>
+
+    <script src="/app.js"></script>
+  </body>
+</html>
