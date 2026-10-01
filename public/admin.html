@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Quotex OTC Admin Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@5.0.0/dist/lightweight-charts.standalone.production.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <link rel="stylesheet" href="/admin-styles.css" />
+</head>
+<body>
+  <div class="admin-shell">
+    <!-- Sidebar Navigation -->
+    <aside class="sidebar">
+      <div class="sidebar-header">
+        <div class="logo">
+          <div class="logo-icon">📊</div>
+          <div>
+            <h1>QuotexOTC</h1>
+            <p class="text-xs">Admin Panel</p>
+          </div>
+        </div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <a href="#" class="nav-item active" data-view="overview">
+          <span class="icon">📈</span>
+          <span>Overview</span>
+        </a>
+        <a href="#" class="nav-item" data-view="markets">
+          <span class="icon">🌐</span>
+          <span>All Markets</span>
+        </a>
+        <a href="#" class="nav-item" data-view="analytics">
+          <span class="icon">📉</span>
+          <span>Analytics</span>
+        </a>
+        <a href="#" class="nav-item" data-view="settings">
+          <span class="icon">⚙️</span>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="status-indicator">
+          <span class="dot online"></span>
+          <span class="text-xs">Connected</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <!-- Top Bar -->
+      <header class="topbar">
+        <div class="topbar-left">
+          <h2 id="pageTitle">Market Overview</h2>
+          <p id="pageSubtitle" class="text-muted">Real-time data analysis</p>
+        </div>
+        <div class="topbar-right">
+          <div class="time-display">📅 <span id="currentTime">--:--</span></div>
+          <button class="btn-icon" id="toggleMobileMenu" style="display: none;">
+            <span>☰</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Content Area -->
+      <div class="content-wrapper">
+        <!-- Overview View -->
+        <section id="view-overview" class="view-section active">
+          <!-- Quick Stats -->
+          <div class="stats-section">
+            <h3>Quick Stats</h3>
+            <div class="stats-grid">
+              <div class="stat-card">
+                <div class="stat-label">Total Markets</div>
+                <div class="stat-value" id="totalMarkets">--</div>
+                <div class="stat-change positive">+100%</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Gainers</div>
+                <div class="stat-value gain" id="gainersCount">--</div>
+                <div class="stat-change positive">📈</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Losers</div>
+                <div class="stat-value loss" id="losersCount">--</div>
+                <div class="stat-change negative">📉</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-label">Data Points</div>
+                <div class="stat-value" id="totalDataPoints">--</div>
+                <div class="stat-change">Updated</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Featured Market Chart -->
+          <div class="featured-chart-section">
+            <div class="section-header">
+              <h3>Featured Market</h3>
+              <select id="featuredSymbolSelect" class="select-sm">
+                <option>EURUSD_otc</option>
+                <option>GBPUSD_otc</option>
+                <option>BTCUSD_otc</option>
+              </select>
+            </div>
+            <div class="chart-container" id="featuredChart"></div>
+            <div class="chart-info" id="chartInfo">
+              <div class="info-item">
+                <span class="label">Current Price</span>
+                <span class="value" id="currentPrice">--</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Change (24h)</span>
+                <span class="value" id="priceChange">--</span>
+              </div>
+              <div class="info-item">
+                <span class="label">Volume</span>
+                <span class="value" id="currentVolume">--</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Market Summary Table -->
+          <div class="markets-table-section">
+            <div class="section-header">
+              <h3>Market Summary</h3>
+              <input type="text" id="searchMarkets" class="input-search" placeholder="Search market..." />
+            </div>
+            <div class="table-responsive">
+              <table class="markets-table">
+                <thead>
+                  <tr>
+                    <th>Symbol</th>
+                    <th>Price</th>
+                    <th class="hide-mobile">24h Change</th>
+                    <th class="hide-mobile">Volume</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody id="marketsTableBody">
+                  <!-- Populated by JS -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- All Markets View -->
+        <section id="view-markets" class="view-section">
+          <div class="section-header">
+            <h3>All Markets Grid</h3>
+          </div>
+          <div class="markets-grid" id="marketsGrid">
+            <!-- Populated by JS -->
+          </div>
+        </section>
+
+        <!-- Analytics View -->
+        <section id="view-analytics" class="view-section">
+          <div class="analytics-container">
+            <div class="section-header">
+              <h3>Market Analytics</h3>
+            </div>
+            <div class="analytics-grid">
+              <div class="analytics-card">
+                <h4>Market Distribution</h4>
+                <div id="distributionChart" class="mini-chart"></div>
+              </div>
+              <div class="analytics-card">
+                <h4>Top Gainers</h4>
+                <div id="topGainers" class="list-view">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+              <div class="analytics-card">
+                <h4>Top Losers</h4>
+                <div id="topLosers" class="list-view">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+              <div class="analytics-card">
+                <h4>Collector Status</h4>
+                <div id="collectorStatus" class="status-view">
+                  <!-- Populated by JS -->
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- Settings View -->
+        <section id="view-settings" class="view-section">
+          <div class="settings-container">
+            <div class="section-header">
+              <h3>Settings</h3>
+            </div>
+            <div class="settings-group">
+              <h4>Display Settings</h4>
+              <label class="checkbox-label">
+                <input type="checkbox" id="enableNotifications" checked />
+                <span>Enable Notifications</span>
+              </label>
+              <label class="checkbox-label">
+                <input type="checkbox" id="enableAutoRefresh" checked />
+                <span>Auto Refresh Data</span>
+              </label>
+            </div>
+            <div class="settings-group">
+              <h4>Data Settings</h4>
+              <label class="setting-item">
+                <span>Refresh Interval (seconds)</span>
+                <input type="number" id="refreshInterval" value="60" min="10" max="300" />
+              </label>
+            </div>
+            <div class="settings-group">
+              <h4>System Information</h4>
+              <div class="info-box">
+                <p><strong>API Status:</strong> <span id="apiStatus" class="status-online">Online</span></p>
+                <p><strong>Database:</strong> <span id="dbStatus" class="status-online">Connected</span></p>
+                <p><strong>Last Update:</strong> <span id="lastUpdate">--</span></p>
+                <p><strong>Version:</strong> <span>1.0.0</span></p>
+              </div>
+            </div>
+            <div class="settings-group">
+              <button class="btn btn-primary" id="saveSettings">Save Settings</button>
+            </div>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script src="/admin-app.js"></script>
+</body>
+</html>
